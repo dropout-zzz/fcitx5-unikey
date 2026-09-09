@@ -617,15 +617,42 @@ void UnikeyState::preedit(KeyEvent &keyEvent) {
         syncState(sym);
 
         // commit string: if need
-        if (!preeditStr_.empty()) {
-            if (preeditStr_.back() == sym && isWordBreakSym(sym)) {
-                commit();
-                keyEvent.filterAndAccept();
-                return;
+        if (!preeditStr_.empty() && preeditStr_.back() == sym) {
+            if (sym == FcitxKey_space || sym == FcitxKey_minus)
+                goto need_check;
+
+            if (isWordBreakSym(sym))
+                goto do_commit;
+
+            goto dont_commit;
+
+need_check:
+        {
+            auto length = utf8::lengthValidated(preeditStr_);
+
+            if (length == utf8::INVALID_LENGTH || length < 2) {
+                goto do_commit;
             }
+
+            auto start = utf8::nextNChar(preeditStr_.begin(), length - 2);
+            auto secondLastChar = utf8::getChar(start, preeditStr_.end());
+
+            if (!utf8::isValidChar(secondLastChar) ||
+                !isVnChar(secondLastChar)) {
+                goto do_commit;
+            }
+
+            goto dont_commit;
+        }
+
+do_commit:
+            commit();
+            keyEvent.filterAndAccept();
+            return;
         }
         // end commit string
 
+dont_commit:
         updatePreedit();
         keyEvent.filterAndAccept();
         return;
