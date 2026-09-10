@@ -22,6 +22,7 @@
 #include <fcitx/inputcontextproperty.h>
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/instance.h>
+#include <hanviet.h>
 #include <memory>
 #include <string>
 #include <unikeyinputcontext.h>

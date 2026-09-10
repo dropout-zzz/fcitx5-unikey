@@ -4,7 +4,7 @@ set( fcitx_unikey_sources
     )
 
 add_fcitx5_addon(unikey ${fcitx_unikey_sources})
-target_link_libraries(unikey Fcitx5::Core Fcitx5::Config unikey-lib)
+target_link_libraries(unikey Fcitx5::Core Fcitx5::Config unikey-lib ${HANVIET_TARGET})
 target_include_directories(unikey PRIVATE ${PROJECT_BINARY_DIR})
 if (ENABLE_QT)
 target_compile_definitions(unikey PRIVATE "-DENABLE_QT")

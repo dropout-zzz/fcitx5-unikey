@@ -44,6 +44,7 @@
 #include <fcitx/text.h>
 #include <fcitx/userinterface.h>
 #include <fcitx/userinterfacemanager.h>
+#include <hanviet.h>
 #include <fcntl.h>
 #include <iterator>
 #include <memory>
