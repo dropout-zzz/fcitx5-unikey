@@ -350,6 +350,7 @@ private:
     UnikeyEngine *engine_;
     UnikeyInputContext uic_;
     InputContext *ic_;
+    UniqueCPtr<HanvietList, &hanviet_list_delete> hanvietList_;
     bool lastKeyWithShift_ = false;
     std::string preeditStr_;
     bool autoCommit_ = false;

@@ -12,6 +12,7 @@
 #include <fcitx-config/rawconfig.h>
 #include <fcitx-utils/handlertable.h>
 #include <fcitx-utils/i18n.h>
+#include <fcitx-utils/misc.h>
 #include <fcitx-utils/signals.h>
 #include <fcitx-utils/standardpaths.h>
 #include <fcitx/action.h>
@@ -77,6 +78,8 @@ public:
     std::string subMode(const InputMethodEntry & /*entry*/,
                         InputContext & /*inputContext*/) override;
 
+    auto table() { return table_.get(); }
+
     UnikeyInputMethod *im() { return &im_; }
 
 private:
@@ -95,6 +98,7 @@ private:
     UnikeyInputMethod im_;
     Instance *instance_;
     FactoryFor<UnikeyState> factory_;
+    UniqueCPtr<HanvietTable, hanviet_table_delete> table_;
     std::unique_ptr<SimpleAction> inputMethodAction_;
     std::vector<std::unique_ptr<SimpleAction>> inputMethodSubAction_;
     std::unique_ptr<Menu> inputMethodMenu_;
