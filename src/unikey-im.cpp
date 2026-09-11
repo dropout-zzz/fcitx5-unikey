@@ -33,6 +33,7 @@
 #include <fcitx-utils/utf8.h>
 #include <fcitx/action.h>
 #include <fcitx/addoninstance.h>
+#include <fcitx/candidatelist.h>
 #include <fcitx/event.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputcontextmanager.h>
@@ -141,6 +142,19 @@ HanvietTable *loadTable() {
 }
 
 } // namespace
+
+class HanvietCandidate : public CandidateWord {
+public:
+    HanvietCandidate(int idx, std::string text)
+        : idx_(idx) {
+        setText(Text(std::move(text)));
+    }
+
+    void select(InputContext *inputContext) const override;
+
+private:
+    int idx_;
+};
 
 class UnikeyState final : public InputContextProperty {
 public:
@@ -858,6 +872,8 @@ void UnikeyState::updatePreedit() {
     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
 
+void HanvietCandidate::select(InputContext *inputContext) const {
+}
 } // namespace fcitx
 
 FCITX_ADDON_FACTORY_V2(unikey, fcitx::UnikeyFactory)
