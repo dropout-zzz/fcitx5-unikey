@@ -48,6 +48,7 @@
 #include <fcntl.h>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -126,6 +127,17 @@ int latinToUtf(unsigned char *dst, const unsigned char *src, int inSize,
 
     *pOutSize = outLeft;
     return (outLeft >= 0);
+}
+
+HanvietTable *loadTable() {
+    const auto &sp = fcitx::StandardPaths::global();
+    auto hanvietTxt =
+        sp.locate(fcitx::StandardPathsType::Data, "hanviet/dict.txt");
+    HanvietTable *table = nullptr;
+    if (!hanvietTxt.empty()) {
+        table = hanviet_table_load(hanvietTxt.string().c_str());
+    }
+    return table ? table : hanviet_table_load(nullptr);
 }
 
 } // namespace
@@ -360,7 +372,11 @@ private:
 UnikeyEngine::UnikeyEngine(Instance *instance)
     : instance_(instance), factory_([this](InputContext &ic) {
           return new UnikeyState(this, &ic);
-      }) {
+      }), table_(loadTable()) {
+    if (!table_) {
+        throw std::runtime_error("Failed to load hanviet table.");
+    }
+
     instance_->inputContextManager().registerProperty("unikey-state",
                                                       &factory_);
 
