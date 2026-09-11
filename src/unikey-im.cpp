@@ -73,6 +73,14 @@ const unsigned int Unikey_OC[] = {CONV_CHARSET_XUTF8,  CONV_CHARSET_TCVN3,
 constexpr unsigned int NUM_OUTPUTCHARSET = FCITX_ARRAY_SIZE(Unikey_OC);
 static_assert(NUM_OUTPUTCHARSET == UkConvI18NAnnotation::enumLength);
 
+const KeyList &selectionKeys() {
+    static const KeyList selectionKeys{
+        Key(FcitxKey_1), Key(FcitxKey_2), Key(FcitxKey_3), Key(FcitxKey_4),
+        Key(FcitxKey_5), Key(FcitxKey_6), Key(FcitxKey_7), Key(FcitxKey_8),
+        Key(FcitxKey_9), Key(FcitxKey_0)};
+    return selectionKeys;
+}
+
 bool isWordBreakSym(unsigned char c) { return WordBreakSyms.contains(c); }
 
 bool isWordAutoCommit(unsigned char c) {
@@ -202,6 +210,7 @@ public:
     void commit();
     void syncState(KeySym sym = FcitxKey_None);
     void updatePreedit();
+    void setLookupTable();
 
     void eraseChars(int num_chars) {
         int i;
@@ -870,6 +879,27 @@ void UnikeyState::updatePreedit() {
     }
     ic_->updatePreedit();
     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+}
+
+void UnikeyState::setLookupTable() {
+    HanvietList *list = hanvietList_.get();
+    if (list) {
+        auto candidate = std::make_unique<CommonCandidateList>();
+        candidate->setSelectionKey(selectionKeys());
+        candidate->setCursorPositionAfterPaging(
+            CursorPositionAfterPaging::ResetToFirst);
+        candidate->setPageSize(
+            engine_->instance()->globalConfig().defaultPageSize());
+        auto n = hanviet_list_get_size(list);
+        for (auto i = 0; i < n; i++) {
+            const char *value = hanviet_list_get_nth_value(list, i);
+            candidate->append<HanvietCandidate>(i, value);
+        }
+        if (n) {
+            candidate->setGlobalCursorIndex(0);
+            ic_->inputPanel().setCandidateList(std::move(candidate));
+        }
+    }
 }
 
 void HanvietCandidate::select(InputContext *inputContext) const {
