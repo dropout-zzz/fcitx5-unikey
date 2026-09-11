@@ -147,6 +147,14 @@ public:
     UnikeyState(UnikeyEngine *engine, InputContext *ic)
         : engine_(engine), uic_(engine->im()), ic_(ic) {}
 
+    void updateLookupTable() {
+        hanvietList_.reset(lookupTable(preeditStr_));
+    }
+
+    HanvietList *lookupTable(const std::string &key) {
+        return hanviet_table_match_exact(engine_->table(), key.data());
+    }
+
     void keyEvent(KeyEvent &keyEvent) {
         // Ignore all key release.
         if (keyEvent.isRelease()) {
