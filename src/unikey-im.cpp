@@ -209,8 +209,9 @@ public:
     void handleIgnoredKey();
     void commit();
     void syncState(KeySym sym = FcitxKey_None);
-    void updatePreedit();
+    void updatePreedit(bool setTable = false);
     void setLookupTable();
+    void select(int pos);
 
     void eraseChars(int num_chars) {
         int i;
@@ -233,6 +234,7 @@ public:
     void reset() {
         uic_.resetBuf();
         preeditStr_.clear();
+        hanvietList_.reset();
         updatePreedit();
         lastShiftPressed_ = FcitxKey_None;
     }
@@ -606,7 +608,8 @@ void UnikeyState::preedit(KeyEvent &keyEvent) {
 
             autoCommit_ = false;
         }
-        updatePreedit();
+        updateLookupTable();
+        updatePreedit(true);
 
         keyEvent.filterAndAccept();
         return;
@@ -702,7 +705,9 @@ do_commit:
         // end commit string
 
 dont_commit:
-        updatePreedit();
+        updateLookupTable();
+
+        updatePreedit(true);
         keyEvent.filterAndAccept();
         return;
     } // end capture printable char
@@ -845,7 +850,7 @@ void UnikeyState::syncState(KeySym sym) {
     // end process result of ukengine
 }
 
-void UnikeyState::updatePreedit() {
+void UnikeyState::updatePreedit(bool setTable) {
     auto &inputPanel = ic_->inputPanel();
 
     inputPanel.reset();
@@ -878,6 +883,9 @@ void UnikeyState::updatePreedit() {
         }
     }
     ic_->updatePreedit();
+
+    if (setTable) setLookupTable();
+
     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
 }
 
@@ -902,7 +910,18 @@ void UnikeyState::setLookupTable() {
     }
 }
 
+void UnikeyState::select(int pos) {
+    const char *value;
+
+    value = hanviet_list_get_nth_value(hanvietList_.get(), pos);
+
+    ic_->commitString(value);
+    reset();
+}
+
 void HanvietCandidate::select(InputContext *inputContext) const {
+    auto *state = inputContext->propertyAs<UnikeyState>("unikey-state");
+    state->select(idx_);
 }
 } // namespace fcitx
 
