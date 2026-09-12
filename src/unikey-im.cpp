@@ -561,6 +561,58 @@ void UnikeyState::preedit(KeyEvent &keyEvent) {
         lastShiftPressed_ = FcitxKey_None;
     }
 
+    // Handle candidate selection.
+    auto candList = ic_->inputPanel().candidateList();
+    if (candList && !candList->empty()) {
+        if (keyEvent.key().checkKeyList(*engine_->config().prevPageKey)) {
+            candList->toPageable()->prev();
+            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+            keyEvent.filterAndAccept();
+            return;
+        }
+        if (keyEvent.key().checkKeyList(*engine_->config().nextPageKey)) {
+            candList->toPageable()->next();
+            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+            keyEvent.filterAndAccept();
+            return;
+        }
+
+        if (keyEvent.key().checkKeyList(
+                *engine_->config().prevCandidateKey)) {
+            candList->toCursorMovable()->prevCandidate();
+            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+            keyEvent.filterAndAccept();
+            return;
+        }
+        if (keyEvent.key().checkKeyList(
+                *engine_->config().nextCandidateKey)) {
+            candList->toCursorMovable()->nextCandidate();
+            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+            keyEvent.filterAndAccept();
+            return;
+        }
+
+        auto idx = keyEvent.key().keyListIndex(selectionKeys());
+        if (idx >= 0) {
+            if (idx < candList->size()) {
+                candList->candidate(idx).select(ic_);
+            }
+            keyEvent.filterAndAccept();
+            return;
+        }
+
+        if (keyEvent.key().check(FcitxKey_Return)) {
+            auto idx = candList->cursorIndex();
+            idx = std::max(idx, 0);
+
+            if (idx < candList->size()) {
+                candList->candidate(idx).select(ic_);
+                keyEvent.filterAndAccept();
+                return;
+            }
+        }
+    }
+
     if (state.testAny(KeyState::Ctrl_Alt) || sym == FcitxKey_Control_L ||
         sym == FcitxKey_Control_R || sym == FcitxKey_Tab ||
         sym == FcitxKey_Return || sym == FcitxKey_Delete ||

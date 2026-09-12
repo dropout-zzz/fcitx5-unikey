@@ -47,6 +47,30 @@ FCITX_CONFIGURATION(
         this, "InputMethod", _("Input Method"), UkTelex};
     OptionWithAnnotation<UkConv, UkConvI18NAnnotation> oc{
         this, "OutputCharset", _("Output Charset"), UkConv::XUTF8};
+    KeyListOption prevPageKey{
+        this,
+        "PrevPage",
+        _("Prev Page"),
+        {Key(FcitxKey_Up)},
+        KeyListConstrain(KeyConstrainFlag::AllowModifierLess)};
+    KeyListOption nextPageKey{
+        this,
+        "NextPage",
+        _("Next Page"),
+        {Key(FcitxKey_Down)},
+        KeyListConstrain(KeyConstrainFlag::AllowModifierLess)};
+    KeyListOption prevCandidateKey{
+        this,
+        "PrevCandidate",
+        _("Prev Candidate"),
+        {Key(FcitxKey_Tab, KeyState::Shift)},
+        KeyListConstrain(KeyConstrainFlag::AllowModifierLess)};
+    KeyListOption nextCandidateKey{
+        this,
+        "NextCandidate",
+        _("Next Candidate"),
+        {Key(FcitxKey_Tab)},
+        KeyListConstrain(KeyConstrainFlag::AllowModifierLess)};
     Option<bool> spellCheck{this, "SpellCheck", _("Enable spell check"), true};
     Option<bool> macro{this, "Macro", _("Enable Macro"), true};
     Option<bool> process_w_at_begin{this, "ProcessWAtBegin",
